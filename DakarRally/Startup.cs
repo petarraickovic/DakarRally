@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VehicleModelEnum = DakarRally.Domain.Enums.VehicleModel;
+using VehicleStatusEnum = DakarRally.Domain.Enums.VehicleStatus;
 
 namespace DakarRally
 {
@@ -73,6 +74,7 @@ namespace DakarRally
                 });
                 cfg.CreateMap<Vehicle, VehicleDtoWithDetails>()
                 .ForMember(x => x.VehicleModel, opt => opt.MapFrom(y => y.VehicleModel.Model))
+                .ForMember(x => x.Status, opt => opt.MapFrom(y => y.VehicleStatus.Status))
                 .ForMember(x => x.VehicleType, opt => opt.MapFrom(y => y.Model != (long)VehicleModelEnum.Truck ? y.VehicleType.Type : string.Empty));
                 cfg.CreateMap<Vehicle, VehicleStatistics>();
                 cfg.CreateMap<Race, RaceStatusResponse>()
@@ -82,13 +84,11 @@ namespace DakarRally
                     PopulateVehicleModelObjs(dto, entity, "Truck", (int)VehicleModelEnum.Truck);
                     PopulateVehicleModelObjs(dto, entity, "Car", (int)VehicleModelEnum.Car);
                     PopulateVehicleModelObjs(dto, entity, "Motorcycle", (int)VehicleModelEnum.Motorcycle);
-                    PopulateVehicleStatusObjs(dto, entity, "Running");
-                    PopulateVehicleStatusObjs(dto, entity, "LightMalfunction");
-                    PopulateVehicleStatusObjs(dto, entity, "HeavyMalfunction");
-                    PopulateVehicleStatusObjs(dto, entity, "FinishedRace");
-
-
-
+                    PopulateVehicleStatusObjs(dto, entity, "Pending", (int)VehicleStatusEnum.Pending);
+                    PopulateVehicleStatusObjs(dto, entity, "Running", (int)VehicleStatusEnum.Running);
+                    PopulateVehicleStatusObjs(dto, entity, "LightMalfunction", (int)VehicleStatusEnum.LightMulfunction);
+                    PopulateVehicleStatusObjs(dto, entity, "HeavyMalfunction", (int)VehicleStatusEnum.HeavyMulfunction);
+                    PopulateVehicleStatusObjs(dto, entity, "FinishedRace", (int)VehicleStatusEnum.FinishedRace);
                 });
             });
             IMapper mapper = mapperConfig.CreateMapper();
@@ -162,12 +162,12 @@ namespace DakarRally
                 raceStatus.VehicleModels.Add(vmObj);
             }
         }
-        private void PopulateVehicleStatusObjs(RaceStatusResponse raceStatus, Race race, string status)
+        private void PopulateVehicleStatusObjs(RaceStatusResponse raceStatus, Race race, string status, int statusID)
         {
             VehicleStatusObject vmObj = new()
             {
                 VehicleStatus = status,
-                NumberOfVehicles = race.Vehicles.Where(x => x.Status == status).Count()
+                NumberOfVehicles = race.Vehicles.Where(x => x.Status == statusID).Count()
             };
             if (vmObj.NumberOfVehicles != 0)
             {

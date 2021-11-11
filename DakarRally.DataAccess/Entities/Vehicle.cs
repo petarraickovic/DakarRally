@@ -22,7 +22,7 @@ namespace DakarRally.DataAccess.Entities
         public int HeavyMalfunctionProbablity { get; set; }
         public int LightMalfunctionWaitTime { get; set; }
         public long Distance { get; set; }
-        public string Status { get; set; }
+        public int Status { get; set; }
         public DateTime? FinishTime { get; set; }
         public double MalfunctionStatistics { get; set; }
 
@@ -30,7 +30,7 @@ namespace DakarRally.DataAccess.Entities
         public VehicleModel VehicleModel { get; set; }
         public Race Race { get; set; }
         public VehicleType VehicleType { get; set; }
-
+        public VehicleStatus VehicleStatus { get; set; }
 
 
 

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using RaceStatusEnum = DakarRally.Domain.Enums.RaceStatus;
+using VehicleStatusEnum = DakarRally.Domain.Enums.VehicleStatus;
 
 namespace DakarRally.DataAccess.RaceSimulator
 {
@@ -60,11 +61,11 @@ namespace DakarRally.DataAccess.RaceSimulator
             long i = 0;
             double numberOfLightMulfunctions = 0.0;
             long lightMalfunctionTimer = vehicle.LightMalfunctionWaitTime;
-            vehicle.Status = "Running";
+            vehicle.Status = (int)VehicleStatusEnum.Running;
             UpdateVehicle(vehicle, newInstanceOfContext);
             while (i < RaceFinishTime)
             {
-                if (vehicle.Status != "LightMalfunction")
+                if (vehicle.Status != (int)VehicleStatusEnum.LightMulfunction)
                 {
                     if (RaceLength - vehicle.Distance < vehicle.MaxSpeed)//vehicle.MaxSpeed*1h
                     {
@@ -86,7 +87,7 @@ namespace DakarRally.DataAccess.RaceSimulator
                     {
                         numberOfLightMulfunctions += 1;
                         RaceFinishTime += vehicle.LightMalfunctionWaitTime;
-                        vehicle.Status = "LightMalfunction";
+                        vehicle.Status = (int)VehicleStatusEnum.LightMulfunction;
                     }
                     UpdateVehicle(vehicle, newInstanceOfContext);
                 }
@@ -95,7 +96,7 @@ namespace DakarRally.DataAccess.RaceSimulator
                     lightMalfunctionTimer -= 1;
                     if (lightMalfunctionTimer == 0)
                     {
-                        vehicle.Status = "Running";
+                        vehicle.Status = (int)VehicleStatusEnum.Running;
                         UpdateVehicle(vehicle, newInstanceOfContext);
                         lightMalfunctionTimer = vehicle.LightMalfunctionWaitTime;
                     }
@@ -103,9 +104,9 @@ namespace DakarRally.DataAccess.RaceSimulator
                 Thread.Sleep(1000);
                 i++;
             }
-            if (vehicle.Status != "HeavyMalfunction")
+            if (vehicle.Status != (int)VehicleStatusEnum.HeavyMulfunction)
             {
-                vehicle.Status = "FinishedRace";
+                vehicle.Status = (int)VehicleStatusEnum.FinishedRace;
                 double timeToAdd = CalculateLengthOfRace(i, vehicle);
                 vehicle.FinishTime = raceStartTime.AddHours(timeToAdd);
                 var stat = vehicle.LightMalfunctionWaitTime * numberOfLightMulfunctions / timeToAdd;
@@ -140,7 +141,7 @@ namespace DakarRally.DataAccess.RaceSimulator
         private void FinishRaceIncaseOfAnException()
         {
             List<Vehicle> vehiclesInRace = _dakarContext.Vehicles.Where(x => x.RaceID == RaceID).ToList();
-            vehiclesInRace.ForEach(x => x.Status = "FinishedRace");
+            vehiclesInRace.ForEach(x => x.Status = (int)VehicleStatusEnum.FinishedRace);
             _dakarContext.Vehicles.UpdateRange(vehiclesInRace);
             Race raceToFinish = _dakarContext.Races.Where(x => x.ID == RaceID).FirstOrDefault();
             raceToFinish.Status = (int)RaceStatusEnum.Finished;
@@ -170,7 +171,7 @@ namespace DakarRally.DataAccess.RaceSimulator
 
         private void HandleHeavyMalfunction(Vehicle vehicle, DakarContext context, long RaceFinishTime)
         {
-            vehicle.Status = "HeavyMalfunction";
+            vehicle.Status = (int)VehicleStatusEnum.HeavyMulfunction;
             var stat = (RaceFinishTime - vehicle.Distance / vehicle.MaxSpeed) * 1.0 / RaceFinishTime;
             vehicle.MalfunctionStatistics = Math.Round(stat, 2);
             UpdateVehicle(vehicle, context);

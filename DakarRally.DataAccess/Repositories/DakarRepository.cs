@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using RaceStatusEnum = DakarRally.Domain.Enums.RaceStatus;
 using VehicleModelEnum = DakarRally.Domain.Enums.VehicleModel;
 using VehicleTypeEnum = DakarRally.Domain.Enums.VehicleType;
+using VehicleStatusEnum = DakarRally.Domain.Enums.VehicleStatus;
 
 namespace DakarRally.DataAccess.Repositories
 {
@@ -43,6 +44,8 @@ namespace DakarRally.DataAccess.Repositories
                 .Include(x => x.RaceStatus) 
                 .Include(x => x.Vehicles)
                 .ThenInclude(x => x.VehicleModel)
+                 .Include(x => x.Vehicles)
+                .ThenInclude(x => x.VehicleStatus)
                 .FirstOrDefault();
             return race;
 
@@ -66,6 +69,13 @@ namespace DakarRally.DataAccess.Repositories
         public VehicleModel GetModelIdByString(string model)
         {
             VehicleModel result = _dakarContext.VehicleModels.Where(x => x.Model == model).FirstOrDefault();
+            return result;
+        }
+
+
+        public VehicleStatus GetVehicleStatusByString(string status)
+        {
+            VehicleStatus result = _dakarContext.VehicleStatuses.Where(x => x.Status == status).FirstOrDefault();
             return result;
         }
         public VehicleType GetTypeIdByString(string type)
@@ -114,8 +124,11 @@ namespace DakarRally.DataAccess.Repositories
 
         public List<Vehicle> GetVehiclesByRaceID(long raceID, int? model = null)
         {
-            var query = _dakarContext.Vehicles.Where(x => x.RaceID == raceID).Include(x => x.VehicleModel)
-                .Include(x => x.VehicleType).AsQueryable();
+            var query = _dakarContext.Vehicles.Where(x => x.RaceID == raceID)
+                .Include(x => x.VehicleModel)
+                .Include(x => x.VehicleType)
+                .Include(x => x.VehicleStatus)
+                .AsQueryable();
 
             if(model != null)
             {
@@ -127,11 +140,12 @@ namespace DakarRally.DataAccess.Repositories
         }
 
         public List<Vehicle> GetVehiclesByParams(string team = null, long? model = null, 
-            DateTime? manufacturingDate = null, string status = null, long? distance = null)
+            DateTime? manufacturingDate = null, int? status = null, long? distance = null)
         {
             var query = _dakarContext.Vehicles
                 .Include(x => x.VehicleModel) 
                 .Include(x => x.VehicleType)
+                .Include(x => x.VehicleStatus)
                 .AsQueryable();
             if(team != null)
             {
@@ -159,19 +173,26 @@ namespace DakarRally.DataAccess.Repositories
 
         public void SetupDB()
         {
-            _dakarContext.RaceStatuses.Add(new DataAccess.Entities.RaceStatus { ID = (int)RaceStatusEnum.Pending ,Status = "Pending" });
-            _dakarContext.RaceStatuses.Add(new DataAccess.Entities.RaceStatus { ID = (int)RaceStatusEnum.Running, Status = "Running" });
-            _dakarContext.RaceStatuses.Add(new DataAccess.Entities.RaceStatus { ID = (int)RaceStatusEnum.Finished, Status = "Finished" });
+            _dakarContext.RaceStatuses.Add(new RaceStatus { ID = (int)RaceStatusEnum.Pending ,Status = "Pending" });
+            _dakarContext.RaceStatuses.Add(new RaceStatus { ID = (int)RaceStatusEnum.Running, Status = "Running" });
+            _dakarContext.RaceStatuses.Add(new RaceStatus { ID = (int)RaceStatusEnum.Finished, Status = "Finished" });
             _dakarContext.SaveChanges();
-            _dakarContext.VehicleModels.Add(new DataAccess.Entities.VehicleModel { ID = (int)VehicleModelEnum.Truck, Model = "Truck" });
-            _dakarContext.VehicleModels.Add(new DataAccess.Entities.VehicleModel { ID = (int)VehicleModelEnum.Car, Model = "Car" });
-            _dakarContext.VehicleModels.Add(new DataAccess.Entities.VehicleModel { ID = (int)VehicleModelEnum.Motorcycle, Model = "Motorcycle" });
+            _dakarContext.VehicleModels.Add(new VehicleModel { ID = (int)VehicleModelEnum.Truck, Model = "Truck" });
+            _dakarContext.VehicleModels.Add(new VehicleModel { ID = (int)VehicleModelEnum.Car, Model = "Car" });
+            _dakarContext.VehicleModels.Add(new VehicleModel { ID = (int)VehicleModelEnum.Motorcycle, Model = "Motorcycle" });
             _dakarContext.SaveChanges();
 
             _dakarContext.VehicleTypes.Add(new VehicleType { ID = (int)VehicleTypeEnum.Truck, Type = "Truck" });
             _dakarContext.VehicleTypes.Add(new VehicleType { ID = (int)VehicleTypeEnum.Sport, Type = "Sport" });
             _dakarContext.VehicleTypes.Add(new VehicleType { ID = (int)VehicleTypeEnum.Terrain, Type = "Terrain" });
             _dakarContext.VehicleTypes.Add(new VehicleType { ID = (int)VehicleTypeEnum.Cross, Type = "Cross" });
+            _dakarContext.SaveChanges();
+
+            _dakarContext.VehicleStatuses.Add(new VehicleStatus { ID = (int)VehicleStatusEnum.Pending, Status = "Peniding" });
+            _dakarContext.VehicleStatuses.Add(new VehicleStatus { ID = (int)VehicleStatusEnum.Running, Status = "Running" });
+            _dakarContext.VehicleStatuses.Add(new VehicleStatus { ID = (int)VehicleStatusEnum.LightMulfunction, Status = "LightMulfunction" });
+            _dakarContext.VehicleStatuses.Add(new VehicleStatus { ID = (int)VehicleStatusEnum.HeavyMulfunction, Status = "HeavyMulfunction" });
+            _dakarContext.VehicleStatuses.Add(new VehicleStatus { ID = (int)VehicleStatusEnum.FinishedRace, Status = "FinishedRace" });
             _dakarContext.SaveChanges();
         }
 

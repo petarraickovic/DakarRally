@@ -24,6 +24,7 @@ namespace DakarRally.DataAccess.Interfaces
         Race GetRaceByStatus(int statusID);
         List<Vehicle> GetVehiclesByRaceID(long raceID, int? model = null);
         List<Vehicle> GetVehiclesByParams(string team = null, long? model = null,
-            DateTime? manufacturingDate = null, string status = null, long? distance = null);
+            DateTime? manufacturingDate = null, int? status = null, long? distance = null);
+        VehicleStatus GetVehicleStatusByString(string status);
     }
 }

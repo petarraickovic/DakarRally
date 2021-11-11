@@ -32,7 +32,7 @@ namespace DakarRally.Models.ErrorHandler
 
         public CustomException ThrowException()
         {
-            throw new CustomException(JsonConvert.SerializeObject(this));
+            throw new CustomException(this);
         }
 
 
