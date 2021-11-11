@@ -18,7 +18,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using RaceStatusEnum = DakarRally.Domain.Enums.RaceStatus;
-using VehicleModelEnum = DakarRally.Domain.Enums.VehicleModel;
+using VehicleStatusEnum = DakarRally.Domain.Enums.VehicleStatus;
 
 namespace DakarRally.Controllers
 {
@@ -50,14 +50,14 @@ namespace DakarRally.Controllers
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(Error))]
         public IActionResult CreateRace([FromRoute] int year)
         {
-            int yearNmbr = ValidateYearAndConvert(year);
-            Race race = new()
-            {
-                Year = yearNmbr,
-                Status = (int)RaceStatusEnum.Pending
-            };
             try
             {
+                int yearNmbr = ValidateYearAndConvert(year);
+                Race race = new()
+                {
+                    Year = yearNmbr,
+                    Status = (int)RaceStatusEnum.Pending
+                };
                 _dakarRepo.CreateRace(race);
                 return new OkObjectResult(race.ID);
             }
@@ -69,14 +69,6 @@ namespace DakarRally.Controllers
         }
 
 
-        [HttpGet]
-        [Route("getracebyid/{raceID}")]
-        public IActionResult GetRace([FromRoute] long raceID)
-        {
-            Race race = _dakarRepo.GetRaceByID(raceID);
-            RaceDto raceDto = _mapper.Map<RaceDto>(race);
-            return new OkObjectResult(raceDto);
-        }
 
 
 
@@ -97,6 +89,7 @@ namespace DakarRally.Controllers
                 }
                 Vehicle vehicle = GenerateVehicleObject(vehicleDto);
                 vehicle.ID = 0;
+                vehicle.Status = (int)VehicleStatusEnum.Pending;
                 _dakarRepo.AddVehicleToDB(vehicle);
                 return new OkObjectResult(vehicle.ID);
             }
@@ -135,7 +128,7 @@ namespace DakarRally.Controllers
         }
 
 
-        [HttpPatch]
+        [HttpDelete]
         [Route("removevehiclefromrace/{vehicleID}")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(string))]
         [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(Error))]
@@ -249,7 +242,7 @@ namespace DakarRally.Controllers
                 int? vehicleModel = null;
                 string localTeam = null;
                 DateTime? localMD = null;
-                string localStatus = null;
+                int? localStatus = null;
                 long? localDistance = null;
                 if (!string.IsNullOrWhiteSpace(model))
                 {
@@ -271,7 +264,12 @@ namespace DakarRally.Controllers
                 }
                 if (!string.IsNullOrWhiteSpace(status))
                 {
-                    localStatus = status;
+                    VehicleStatus vehicleStatus = _dakarRepo.GetVehicleStatusByString(status);
+                    if(vehicleStatus == null)
+                    {
+                        return new Error().CreateBadRequestError("Status parameter is invalid").ReturnHttpResponse();
+                    }
+                    localStatus = vehicleStatus.ID;
                 }
                 if(distance != null)
                 {

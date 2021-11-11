@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DakarRally.Models.ErrorHandler;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,8 +11,8 @@ namespace DakarRally.Models.Exceptions
     {
         public CustomException() { }
 
-        public CustomException(string message)
-            : base(message) { }
+        public CustomException(Error error)
+            : base(JsonConvert.SerializeObject(error)) { }
 
     }
 }

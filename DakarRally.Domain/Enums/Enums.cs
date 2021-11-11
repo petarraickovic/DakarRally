@@ -1,7 +1,7 @@
 ﻿namespace DakarRally.Domain.Enums
 {
 
-    public enum RaceStatus : long
+    public enum RaceStatus : int
     {
 
         Pending = 1,
@@ -9,7 +9,7 @@
         Finished = 3
     }
 
-    public enum VehicleModel : long
+    public enum VehicleModel : int
     {
 
         Truck = 1,
@@ -17,7 +17,7 @@
         Motorcycle = 3
     }
 
-    public enum VehicleType : long
+    public enum VehicleType : int
     {
 
         Truck = 1,
@@ -26,4 +26,14 @@
         Cross = 4
     }
 
+
+    public enum VehicleStatus : int
+    {
+
+        Pending = 1,
+        Running = 2,
+        LightMulfunction = 3,
+        HeavyMulfunction = 4,
+        FinishedRace = 5
+    }
 }
